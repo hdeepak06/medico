@@ -1,11 +1,8 @@
 *.pyc
 __pycache__/
-*.sqlite3
 *.log
 .DS_Store
 *.swp
-media/
-staticfiles/
 .env
 venv/
 env/
