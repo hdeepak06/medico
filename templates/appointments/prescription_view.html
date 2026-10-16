@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Medical Prescription #{{ prescription.id }} - {{ prescription.patient.user.full_name }} | Medico{% endblock %}
+
+{% block content %}
+<section style="background: var(--slate-100); padding: 3rem 0;">
+  <div class="container">
+    <!-- Top Actions -->
+    <div class="no-print" style="max-width: 860px; margin: 0 auto 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-secondary btn-sm">&larr; Back to Appointment</a>
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="button" onclick="window.print()" class="btn btn-primary btn-sm" id="printPrescriptionBtn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Print / Save as PDF</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Official Prescription Slip -->
+    <div class="prescription-paper" id="printablePrescriptionArea">
+      <!-- Rx Header -->
+      <div class="rx-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
+            <div style="width: 32px; height: 32px; background: var(--primary-gradient); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z"/>
+              </svg>
+            </div>
+            <strong style="font-size: 1.4rem; color: var(--navy-900);">MEDICO HEALTHCARE SYSTEMS</strong>
+          </div>
+          <p style="color: var(--slate-500); font-size: 0.85rem; line-height: 1.4;">
+            {{ prescription.doctor.hospital_name }}<br>
+            {{ prescription.doctor.clinic_address }} &bull; Tel: {{ prescription.doctor.user.phone }}
+          </p>
+        </div>
+
+        <div style="text-align: right;">
+          <strong style="display: block; font-size: 1.15rem; color: var(--navy-900);">{{ prescription.doctor.display_name }}</strong>
+          <span style="color: var(--primary); font-weight: 600; font-size: 0.85rem; display: block;">{{ prescription.doctor.qualification }}</span>
+          <span style="color: var(--slate-500); font-size: 0.8rem;">Specialty: {{ prescription.doctor.specialization.name }}</span>
+          <div style="font-size: 0.78rem; color: var(--slate-400); margin-top: 0.2rem;">Lic: {{ prescription.doctor.license_number|default:"NY-MED-849201" }}</div>
+        </div>
+      </div>
+
+      <!-- Patient Demographics Bar -->
+      <div class="rx-patient-bar">
+        <div>
+          <span>Patient Name</span>
+          <strong>{{ prescription.patient.user.full_name }}</strong>
+        </div>
+        <div>
+          <span>Gender / Blood</span>
+          <strong>{{ prescription.patient.gender }} &bull; {{ prescription.patient.blood_group|default:"N/A" }}</strong>
+        </div>
+        <div>
+          <span>Date of Issue</span>
+          <strong>{{ prescription.created_at|date:"M d, Y" }}</strong>
+        </div>
+        <div>
+          <span>Prescription Ref</span>
+          <strong>#RX-{{ prescription.id }}09{{ appointment.id }}</strong>
+        </div>
+      </div>
+
+      <!-- Diagnosis -->
+      <div style="margin-bottom: 2rem;">
+        <span style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--slate-500); font-weight: 700; margin-bottom: 0.25rem;">Clinical Diagnosis</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: var(--navy-900);">
+          {{ prescription.diagnosis }}
+        </div>
+      </div>
+
+      <!-- Medications Table -->
+      <div class="rx-symbol">℞</div>
+      <table class="medicine-table">
+        <thead>
+          <tr>
+            <th style="width: 30%;">Medication / Brand</th>
+            <th style="width: 15%;">Dosage</th>
+            <th style="width: 25%;">Frequency</th>
+            <th style="width: 15%;">Duration</th>
+            <th style="width: 15%;">Instructions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for med in prescription.medicines %}
+            <tr>
+              <td><strong style="color: var(--navy-900);">{{ med.name }}</strong></td>
+              <td>{{ med.dosage }}</td>
+              <td><span class="status-badge confirmed" style="font-size: 0.75rem;">{{ med.frequency }}</span></td>
+              <td>{{ med.duration }}</td>
+              <td style="color: var(--slate-600); font-size: 0.85rem;">{{ med.instructions }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--slate-500); padding: 1.5rem;">No active medications prescribed. Standard clinical observation recommended.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Clinical Notes & Lifestyle Advice -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+        {% if prescription.clinical_notes %}
+          <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem;">
+            <span style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--slate-500); font-weight: 700; margin-bottom: 0.35rem;">Physician Clinical Observations</span>
+            <p style="color: var(--slate-700); font-size: 0.9rem; line-height: 1.6;">{{ prescription.clinical_notes }}</p>
+          </div>
+        {% endif %}
+
+        {% if prescription.lifestyle_advice %}
+          <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem;">
+            <span style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--slate-500); font-weight: 700; margin-bottom: 0.35rem;">Dietary & Lifestyle Advice</span>
+            <p style="color: var(--slate-700); font-size: 0.9rem; line-height: 1.6;">{{ prescription.lifestyle_advice }}</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Follow-up Recommendation -->
+      {% if prescription.follow_up_date %}
+        <div style="background: var(--primary-light); border: 1px solid rgba(10, 102, 194, 0.2); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-weight: 600; color: var(--navy-900); font-size: 0.92rem;">🗓️ Recommended Follow-up Consultation:</span>
+          <strong style="color: var(--primary); font-size: 1rem;">{{ prescription.follow_up_date|date:"F d, Y" }}</strong>
+        </div>
+      {% endif %}
+
+      <!-- Rx Footer & Digital Signature -->
+      <div class="rx-footer">
+        <div>
+          <span style="display: block; font-size: 0.75rem; color: var(--slate-400);">ELECTRONIC HEALTHCARE SIGNATURE</span>
+          <span style="font-size: 0.85rem; color: var(--emerald-dark); font-weight: 700;">✓ Digitally Authenticated by Medico Platform</span>
+          <div style="font-size: 0.72rem; color: var(--slate-400); margin-top: 0.25rem;">Timestamp: {{ prescription.created_at|date:"Y-m-d H:i:s T" }}</div>
+        </div>
+
+        <div class="doctor-signature-box">
+          <div style="font-family: cursive; font-size: 1.25rem; color: var(--navy-900); height: 35px; display: flex; align-items: center; justify-content: center;">
+            {{ prescription.doctor.display_name }}
+          </div>
+          <div class="signature-line"></div>
+          <span style="font-size: 0.8rem; color: var(--slate-500); font-weight: 600;">Authorized Physician Signature</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

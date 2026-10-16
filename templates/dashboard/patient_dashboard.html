@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Patient Portal | Medico Healthcare{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Patient Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-user">
+      <img src="{{ patient.user.get_avatar }}" alt="{{ patient.user.full_name }}" class="sidebar-avatar">
+      <div class="sidebar-user-info">
+        <h4>{{ patient.user.full_name }}</h4>
+        <span class="role-tag patient">Patient Portal</span>
+      </div>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li>
+        <a href="?tab=overview" class="sidebar-link {% if active_tab == 'overview' %}active{% endif %}">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Appointments Overview</span>
+        </a>
+      </li>
+      <li>
+        <a href="?tab=prescriptions" class="sidebar-link {% if active_tab == 'prescriptions' %}active{% endif %}">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>My Prescriptions ({{ stats.prescriptions_count }})</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'profile' %}" class="sidebar-link">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Medical Profile & Health</span>
+        </a>
+      </li>
+      <li style="margin-top: 1rem;">
+        <a href="{% url 'doctor_list' %}" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">
+          <span>+ Book New Doctor</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h1>Welcome Back, {{ patient.user.first_name }}</h1>
+        <p>Manage your upcoming doctor consultations, digital prescriptions, and personal health metrics.</p>
+      </div>
+
+      <a href="{% url 'book_appointment_general' %}" class="btn btn-primary" id="patientDashboardBookBtn">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Schedule Appointment</span>
+      </a>
+    </div>
+
+    <!-- Quick Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon blue">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span>Upcoming Visits</span>
+          <strong>{{ stats.upcoming_count }}</strong>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon green">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span>Completed Consults</span>
+          <strong>{{ stats.completed_count }}</strong>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon purple">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span>Prescriptions Issued</span>
+          <strong>{{ stats.prescriptions_count }}</strong>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon amber">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span>Blood Group</span>
+          <strong>{{ patient.blood_group|default:"O+" }}</strong>
+        </div>
+      </div>
+    </div>
+
+    {% if active_tab == 'prescriptions' %}
+      <!-- Prescriptions View -->
+      <div class="dashboard-panel">
+        <div class="panel-header">
+          <h2>My Official Prescriptions</h2>
+          <span style="color: var(--slate-500); font-size: 0.9rem;">Issued by attending physicians after consultation</span>
+        </div>
+
+        {% if prescriptions %}
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Prescription Ref</th>
+                  <th>Prescribing Doctor</th>
+                  <th>Clinical Diagnosis</th>
+                  <th>Medications</th>
+                  <th>Date Issued</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for rx in prescriptions %}
+                  <tr>
+                    <td><strong>#RX-{{ rx.id }}09{{ rx.appointment.id }}</strong></td>
+                    <td>
+                      <div style="font-weight: 600; color: var(--navy-900);">{{ rx.doctor.display_name }}</div>
+                      <div style="font-size: 0.8rem; color: var(--slate-500);">{{ rx.doctor.specialization.name }}</div>
+                    </td>
+                    <td><strong style="color: var(--primary);">{{ rx.diagnosis }}</strong></td>
+                    <td>
+                      <span class="status-badge confirmed">{{ rx.medicines|length }} Medicines</span>
+                    </td>
+                    <td>{{ rx.created_at|date:"M d, Y" }}</td>
+                    <td>
+                      <a href="{% url 'prescription_view' rx.appointment.id %}" class="btn btn-primary btn-sm">
+                        <span>View Slip & Print</span>
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem 1rem; color: var(--slate-500);">
+            <p>You have no active prescriptions yet. Prescriptions appear here following completed doctor appointments.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <!-- Upcoming Appointments -->
+      <div class="dashboard-panel">
+        <div class="panel-header">
+          <h2>Upcoming Scheduled Appointments ({{ upcoming_appointments|length }})</h2>
+        </div>
+
+        {% if upcoming_appointments %}
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Doctor & Specialty</th>
+                  <th>Scheduled Date & Time</th>
+                  <th>Visit Mode</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for appt in upcoming_appointments %}
+                  <tr>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <img src="{{ appt.doctor.get_photo }}" alt="{{ appt.doctor.display_name }}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover;">
+                        <div>
+                          <strong style="color: var(--navy-900);">{{ appt.doctor.display_name }}</strong>
+                          <div style="font-size: 0.78rem; color: var(--primary);">{{ appt.doctor.specialization.name }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <strong>{{ appt.formatted_date }}</strong>
+                      <div style="font-size: 0.85rem; color: var(--slate-500);">{{ appt.formatted_time }}</div>
+                    </td>
+                    <td>
+                      {% if appt.consultation_type == 'IN_PERSON' %}
+                        <span class="status-badge confirmed">🏥 In-Person</span>
+                      {% else %}
+                        <span class="status-badge" style="background: #EDE9FE; color: #7C3AED;">💻 Video Telehealth</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ appt.reason_for_visit|truncatewords:6 }}</td>
+                    <td>
+                      {% if appt.status == 'CONFIRMED' %}
+                        <span class="status-badge confirmed">Confirmed</span>
+                      {% else %}
+                        <span class="status-badge pending">Pending</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="action-group">
+                        <a href="{% url 'appointment_detail' appt.id %}" class="btn btn-secondary btn-sm">Details</a>
+                        <a href="{% url 'reschedule_appointment' appt.id %}" class="btn btn-secondary btn-sm" title="Reschedule">📅</a>
+                        <a href="{% url 'cancel_appointment' appt.id %}" class="btn btn-secondary btn-sm" style="color: var(--rose);" title="Cancel">✕</a>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 2.5rem 1rem; color: var(--slate-500);">
+            <p style="margin-bottom: 1rem;">You do not have any upcoming appointments scheduled.</p>
+            <a href="{% url 'doctor_list' %}" class="btn btn-primary btn-sm">Explore Specialists & Book</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Past Consultations -->
+      <div class="dashboard-panel">
+        <div class="panel-header">
+          <h2>Past & Completed Consultations ({{ past_appointments|length }})</h2>
+        </div>
+
+        {% if past_appointments %}
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Doctor</th>
+                  <th>Date & Time</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Prescription / Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for appt in past_appointments %}
+                  <tr>
+                    <td>
+                      <strong>{{ appt.doctor.display_name }}</strong>
+                      <div style="font-size: 0.78rem; color: var(--slate-500);">{{ appt.doctor.specialization.name }}</div>
+                    </td>
+                    <td>{{ appt.formatted_date }} at {{ appt.formatted_time }}</td>
+                    <td>{{ appt.reason_for_visit|truncatewords:6 }}</td>
+                    <td>
+                      {% if appt.status == 'COMPLETED' %}
+                        <span class="status-badge completed">Completed</span>
+                      {% elif appt.status == 'CANCELLED' %}
+                        <span class="status-badge cancelled">Cancelled</span>
+                      {% else %}
+                        <span class="status-badge rejected">{{ appt.get_status_display }}</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if appt.status == 'COMPLETED' %}
+                        <a href="{% url 'prescription_view' appt.id %}" style="color: var(--emerald-dark); font-weight: 700; font-size: 0.85rem;">
+                          📄 View Rx Slip
+                        </a>
+                      {% else %}
+                        <span style="color: var(--slate-400); font-size: 0.85rem;">None</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <a href="{% url 'appointment_detail' appt.id %}" class="btn btn-secondary btn-sm">Review / Details</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 2rem 1rem; color: var(--slate-500);">
+            <p>No past appointment history.</p>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

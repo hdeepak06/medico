@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Find Verified Doctors & Specialists | Medico{% endblock %}
+
+{% block content %}
+<section style="background: var(--slate-100); padding: 3rem 0 2rem; border-bottom: 1px solid var(--slate-200);">
+  <div class="container">
+    <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+      <div class="section-tag">Directory</div>
+      <h1>Find Top-Rated Healthcare Specialists</h1>
+      <p class="lead-text">Browse verified medical practitioners, compare clinical experience and consultation fees, and schedule an appointment in seconds.</p>
+
+      <!-- Search & Filter Bar -->
+      <form action="{% url 'doctor_list' %}" method="GET" style="margin-top: 2rem; background: var(--white); padding: 1rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 0.75rem; align-items: center;" class="filter-form">
+        <div class="search-field">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" name="q" value="{{ search_query }}" placeholder="Doctor name, hospital, city..." aria-label="Search">
+        </div>
+
+        <div class="search-field">
+          <select name="specialty" aria-label="Specialty Filter">
+            <option value="">All Specialties</option>
+            {% for spec in all_specialties %}
+              <option value="{{ spec.slug }}" {% if selected_specialty.slug == spec.slug %}selected{% endif %}>{{ spec.name }} ({{ spec.doc_count }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="search-field">
+          <select name="sort" aria-label="Sort Order">
+            <option value="rating" {% if selected_sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+            <option value="exp" {% if selected_sort == 'exp' %}selected{% endif %}>Most Experienced</option>
+            <option value="fee_asc" {% if selected_sort == 'fee_asc' %}selected{% endif %}>Fee: Low to High</option>
+            <option value="fee_desc" {% if selected_sort == 'fee_desc' %}selected{% endif %}>Fee: High to Low</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="filterSubmitBtn">Apply Filter</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Results Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 style="font-size: 1.4rem;">
+          {% if selected_specialty %}
+            {{ selected_specialty.name }} Specialists
+          {% elif search_query %}
+            Search Results for "{{ search_query }}"
+          {% else %}
+            All Available Physicians
+          {% endif %}
+        </h2>
+        <span style="color: var(--slate-500); font-size: 0.9rem;">Showing {{ doctors|length }} of {{ total_count }} verified doctors</span>
+      </div>
+
+      {% if selected_specialty or search_query %}
+        <a href="{% url 'doctor_list' %}" class="btn btn-secondary btn-sm" style="color: var(--rose);">
+          <span>Clear Filters &times;</span>
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Doctors Grid -->
+    {% if doctors %}
+      <div class="doctors-grid">
+        {% for doctor in doctors %}
+          <div class="doctor-card" id="docCard-{{ doctor.id }}">
+            <div class="doctor-card-header">
+              <img src="{{ doctor.get_photo }}" alt="{{ doctor.display_name }}">
+              <div class="doctor-verified-badge">
+                <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span>Verified</span>
+              </div>
+              <div class="doctor-rating-pill">
+                <span style="color: #F59E0B;">★</span>
+                <span>{{ doctor.rating }}</span>
+                <span style="color: var(--slate-400); font-size: 0.75rem;">({{ doctor.reviews_count }})</span>
+              </div>
+            </div>
+
+            <div class="doctor-card-body">
+              <div class="doctor-specialty-tag">{{ doctor.specialization.name|default:"General Medicine" }}</div>
+              <h3>{{ doctor.display_name }}</h3>
+              <div class="doctor-qualification">{{ doctor.qualification }}</div>
+
+              <div class="doctor-meta-list">
+                <div class="doctor-meta-item">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                  <span>{{ doctor.experience_years }}+ Years Experience</span>
+                </div>
+                <div class="doctor-meta-item">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span>{{ doctor.hospital_name }} &bull; {{ doctor.city }}</span>
+                </div>
+                <div class="doctor-meta-item">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                  <span>{{ doctor.get_consultation_type_display }}</span>
+                </div>
+              </div>
+
+              <div class="doctor-card-footer">
+                <div class="doctor-fee">
+                  <span class="fee-label">Consultation Fee</span>
+                  <span class="fee-amount">${{ doctor.consultation_fee }}</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <a href="{% url 'doctor_detail' doctor.id %}" class="btn btn-secondary btn-sm">Profile</a>
+                  <a href="{% url 'book_appointment' doctor.id %}" class="btn btn-primary btn-sm">Book</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3.5rem;">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&specialty={{ selected_specialty.slug|default:'' }}&sort={{ selected_sort }}" class="btn btn-secondary btn-sm">&larr; Previous</a>
+          {% endif %}
+
+          <span class="btn btn-secondary btn-sm" style="background-color: var(--primary-light); color: var(--primary); font-weight: 700; border-color: var(--primary);">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </span>
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&specialty={{ selected_specialty.slug|default:'' }}&sort={{ selected_sort }}" class="btn btn-secondary btn-sm">Next &rarr;</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    {% else %}
+      <!-- Empty State -->
+      <div style="background: var(--white); border-radius: var(--radius-xl); border: 1px dashed var(--slate-300); padding: 4rem 2rem; text-align: center; max-width: 600px; margin: 2rem auto;">
+        <div style="width: 72px; height: 72px; background: var(--slate-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--slate-400);">
+          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <h3 style="margin-bottom: 0.5rem;">No doctors found matching your criteria</h3>
+        <p style="color: var(--slate-500); margin-bottom: 1.5rem;">Try adjusting your search terms or clearing the specialty filter to view all available specialists.</p>
+        <a href="{% url 'doctor_list' %}" class="btn btn-primary">Reset Search Filters</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Issue Medical Prescription & Complete Consultation | Medico{% endblock %}
+
+{% block content %}
+<section style="background: var(--slate-100); padding: 3rem 0;">
+  <div class="container">
+    <div style="max-width: 920px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <a href="{% url 'doctor_dashboard' %}" class="btn btn-secondary btn-sm">&larr; Back to Doctor Dashboard</a>
+        <span style="font-size: 0.9rem; color: var(--slate-500);">Appointment #{{ appointment.id }}</span>
+      </div>
+
+      <!-- Patient Health Summary Card -->
+      <div class="dashboard-panel" style="background: var(--slate-50); border-left: 4px solid var(--primary); margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--primary);">Patient Under Consultation</span>
+            <h2 style="font-size: 1.35rem; margin-top: 0.2rem;">{{ appointment.patient.user.full_name }}</h2>
+            <div style="font-size: 0.88rem; color: var(--slate-600); margin-top: 0.25rem;">
+              Gender: {{ appointment.patient.gender }} &bull; Blood: <strong>{{ appointment.patient.blood_group|default:"N/A" }}</strong> &bull; DOB: {{ appointment.patient.date_of_birth|default:"Not documented" }}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 0.85rem; color: var(--slate-500);">Consultation Date</span>
+            <div style="font-weight: 700; color: var(--navy-900);">{{ appointment.formatted_date }} at {{ appointment.formatted_time }}</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--slate-200); font-size: 0.88rem;">
+          <div>
+            <strong style="color: var(--rose);">Allergies:</strong>
+            <span>{{ appointment.patient.allergies|default:"None documented" }}</span>
+          </div>
+          <div>
+            <strong style="color: var(--navy-900);">Chronic Conditions:</strong>
+            <span>{{ appointment.patient.chronic_conditions|default:"None documented" }}</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.75rem; font-size: 0.88rem;">
+          <strong>Reported Reason for Visit:</strong> {{ appointment.reason_for_visit }}
+          {% if appointment.symptoms %}&bull; <span style="color: var(--slate-600);">Symptoms: {{ appointment.symptoms }}</span>{% endif %}
+        </div>
+      </div>
+
+      <!-- Prescription Creation Form -->
+      <div class="dashboard-panel" style="box-shadow: var(--shadow-lg);">
+        <div class="panel-header" style="border-bottom: 1px solid var(--slate-200); padding-bottom: 1rem; margin-bottom: 1.75rem;">
+          <div>
+            <span class="section-tag section-tag-emerald">Digital Health Record</span>
+            <h1 style="font-size: 1.6rem;">Clinical Diagnosis & Prescription Regimen</h1>
+          </div>
+          <div style="font-size: 2.5rem; font-family: serif; color: var(--primary); font-weight: 900;">℞</div>
+        </div>
+
+        <form action="{% url 'doctor_complete_appointment' appointment.id %}" method="POST" id="prescriptionWriterForm">
+          {% csrf_token %}
+
+          <!-- Diagnosis -->
+          <div class="form-group">
+            <label class="form-label" style="font-size: 1rem;">Clinical Diagnosis *</label>
+            <input type="text" name="diagnosis" class="form-input" placeholder="e.g. Essential Hypertension Grade 1 / Acute Bronchitis" required style="font-size: 1rem; padding: 0.85rem;">
+          </div>
+
+          <!-- Dynamic Medicines Table -->
+          <div style="margin: 2rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <label class="form-label" style="font-size: 1rem; margin-bottom: 0;">Prescribed Medications & Dosages *</label>
+              <button type="button" class="btn btn-secondary btn-sm" id="addMedicineRowBtn">
+                <span>+ Add Medication</span>
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table" style="border: 1px solid var(--slate-200); border-radius: var(--radius-md);">
+                <thead>
+                  <tr>
+                    <th style="width: 28%;">Medicine / Drug *</th>
+                    <th style="width: 16%;">Dosage</th>
+                    <th style="width: 20%;">Frequency</th>
+                    <th style="width: 14%;">Duration</th>
+                    <th style="width: 16%;">Instructions</th>
+                    <th style="width: 6%;"></th>
+                  </tr>
+                </thead>
+                <tbody id="medicineTableBody">
+                  <tr>
+                    <td><input type="text" name="med_name[]" class="form-input" placeholder="e.g. Lisinopril 10mg" required></td>
+                    <td><input type="text" name="med_dosage[]" class="form-input" placeholder="1 tab"></td>
+                    <td>
+                      <select name="med_frequency[]" class="form-input">
+                        <option value="Once daily" selected>Once daily</option>
+                        <option value="Twice daily">Twice daily</option>
+                        <option value="Three times daily">Three times daily</option>
+                        <option value="As needed">As needed (PRN)</option>
+                      </select>
+                    </td>
+                    <td><input type="text" name="med_duration[]" class="form-input" placeholder="30 days"></td>
+                    <td><input type="text" name="med_instructions[]" class="form-input" placeholder="After breakfast"></td>
+                    <td style="text-align: center;">
+                      <button type="button" class="btn btn-sm btn-danger remove-med-btn" style="padding: 0.35rem 0.6rem;">&times;</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Clinical Notes & Lifestyle Advice -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label class="form-label">Clinical Observations & Examination Findings</label>
+              <textarea name="clinical_notes" class="form-input" rows="4" placeholder="Document physical examination observations, vitals, test reviews..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Dietary & Lifestyle Advice</label>
+              <textarea name="lifestyle_advice" class="form-input" rows="4" placeholder="Special guidance for patient (hydration, activity restrictions, ergonomics, diet)..."></textarea>
+            </div>
+          </div>
+
+          <!-- Follow-up Recommendation -->
+          <div class="form-group" style="max-width: 320px; margin-bottom: 2rem;">
+            <label class="form-label">Recommended Follow-up Date (Optional)</label>
+            <input type="date" name="follow_up_date" class="form-input" min="{{ today }}">
+          </div>
+
+          <!-- Submit Buttons -->
+          <div style="display: flex; gap: 1rem; border-top: 1px solid var(--slate-200); padding-top: 1.5rem;">
+            <a href="{% url 'doctor_dashboard' %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg" style="flex: 2;" id="issuePrescriptionSubmitBtn">
+              <span>✓ Mark Appointment Completed & Sign Prescription</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

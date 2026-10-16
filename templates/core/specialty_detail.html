@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ specialty.name }} Specialists & Doctors | Medico{% endblock %}
+
+{% block content %}
+<section style="background: var(--slate-100); padding: 3rem 0; border-bottom: 1px solid var(--slate-200);">
+  <div class="container">
+    <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+      <a href="{% url 'specialty_list' %}" style="display: inline-flex; align-items: center; gap: 0.35rem; color: var(--slate-500); font-size: 0.9rem; margin-bottom: 1rem;">
+        &larr; Back to all specialties
+      </a>
+      <h1 style="font-size: 2.2rem; margin-bottom: 0.75rem;">{{ specialty.name }} Department</h1>
+      <p class="lead-text">{{ specialty.description }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+      <h2 style="font-size: 1.5rem;">Verified {{ specialty.name }} Doctors ({{ doctors|length }})</h2>
+    </div>
+
+    {% if doctors %}
+      <div class="doctors-grid">
+        {% for doctor in doctors %}
+          <div class="doctor-card">
+            <div class="doctor-card-header">
+              <img src="{{ doctor.get_photo }}" alt="{{ doctor.display_name }}">
+              <div class="doctor-verified-badge">✓ Verified</div>
+              <div class="doctor-rating-pill">★ {{ doctor.rating }}</div>
+            </div>
+
+            <div class="doctor-card-body">
+              <div class="doctor-specialty-tag">{{ specialty.name }}</div>
+              <h3>{{ doctor.display_name }}</h3>
+              <div class="doctor-qualification">{{ doctor.qualification }}</div>
+
+              <div class="doctor-meta-list">
+                <div class="doctor-meta-item">🩺 {{ doctor.experience_years }}+ Years Clinical Experience</div>
+                <div class="doctor-meta-item">🏥 {{ doctor.hospital_name }}</div>
+                <div class="doctor-meta-item">📍 {{ doctor.city }}</div>
+              </div>
+
+              <div class="doctor-card-footer">
+                <div class="doctor-fee">
+                  <span class="fee-label">Consultation Fee</span>
+                  <span class="fee-amount">${{ doctor.consultation_fee }}</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <a href="{% url 'doctor_detail' doctor.id %}" class="btn btn-secondary btn-sm">View Profile</a>
+                  <a href="{% url 'book_appointment' doctor.id %}" class="btn btn-primary btn-sm">Book</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 4rem 2rem; background: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--slate-200);">
+        <h3>No doctors registered under {{ specialty.name }} yet.</h3>
+        <p style="color: var(--slate-500); margin: 1rem 0;">Are you a specialist in this field? Join Medico today.</p>
+        <a href="{% url 'register_doctor' %}" class="btn btn-primary">Join as {{ specialty.name }} Doctor</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

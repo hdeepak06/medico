@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Book Doctor Appointment | Medico Healthcare{% endblock %}
+
+{% block content %}
+<section style="background: var(--slate-100); padding: 3rem 0;">
+  <div class="container">
+    <div style="max-width: 820px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <span class="section-tag">Appointment Booking</span>
+        <h1>Schedule Your Healthcare Consultation</h1>
+        <p class="lead-text">Choose your physician, pick a convenient date and time slot, and receive instantaneous confirmation.</p>
+      </div>
+
+      <div class="dashboard-panel" style="box-shadow: var(--shadow-lg);">
+        <form action="{% url 'book_appointment_general' %}" method="POST" id="mainBookingForm">
+          {% csrf_token %}
+
+          <!-- Step 1: Doctor Selection -->
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label" style="font-size: 1rem;">Select Doctor / Specialist *</label>
+            <select name="doctor_id" id="doctorSelectInput" class="form-input" style="font-size: 1rem; padding: 0.85rem;" required>
+              <option value="">-- Choose a Verified Specialist --</option>
+              {% for doc in doctors %}
+                <option value="{{ doc.id }}" {% if selected_doctor and selected_doctor.id == doc.id %}selected{% endif %}>
+                  {{ doc.display_name }} &bull; {{ doc.specialization.name }} &bull; ${{ doc.consultation_fee }} ({{ doc.hospital_name }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Step 2: Mode of Consultation -->
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label">Consultation Mode *</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <label style="border: 1.5px solid var(--slate-200); padding: 1rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 0.75rem; cursor: pointer; background: var(--slate-50);">
+                <input type="radio" name="consultation_type" value="IN_PERSON" checked>
+                <div>
+                  <strong style="display: block; color: var(--navy-900);">🏥 In-Person Visit</strong>
+                  <span style="font-size: 0.8rem; color: var(--slate-500);">At physician's clinic or hospital</span>
+                </div>
+              </label>
+
+              <label style="border: 1.5px solid var(--slate-200); padding: 1rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 0.75rem; cursor: pointer; background: var(--slate-50);">
+                <input type="radio" name="consultation_type" value="VIDEO">
+                <div>
+                  <strong style="display: block; color: var(--navy-900);">💻 Online Telehealth Video</strong>
+                  <span style="font-size: 0.8rem; color: var(--slate-500);">Secure virtual video room</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Step 3: Date & Time Picker -->
+          <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label class="form-label">Select Date *</label>
+              <input type="date" name="appointment_date" id="appointmentDateInput" class="form-input" min="{{ min_date }}" max="{{ max_date }}" value="{{ min_date }}" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Available Time Slots *</label>
+              <input type="hidden" name="appointment_time" id="selectedTimeInput" required>
+              <div id="slotContainer" data-doctor-id="{% if selected_doctor %}{{ selected_doctor.id }}{% endif %}">
+                <!-- Injected dynamically via API -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Medical Reason & Notes -->
+          <div class="form-group">
+            <label class="form-label">Primary Reason for Visit *</label>
+            <input type="text" name="reason_for_visit" class="form-input" placeholder="e.g. Chronic back pain, Annual general checkup, Skin rash..." required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Current Symptoms or Medications (Optional)</label>
+            <textarea name="symptoms" class="form-input" rows="3" placeholder="Briefly describe your symptoms or what you'd like to discuss..."></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <div style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;" id="confirmBookingSubmitBtn">
+              <span>Confirm & Schedule Appointment</span>
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+            <p style="text-align: center; color: var(--slate-500); font-size: 0.82rem; margin-top: 0.75rem;">
+              ✓ Real-time slot verification prevents double-booking &bull; Encrypted health transmission
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

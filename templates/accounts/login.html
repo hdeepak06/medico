@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login to Medico | Secure Healthcare Access{% endblock %}
+
+{% block content %}
+<section style="padding: 4rem 0; min-height: 80vh; display: flex; align-items: center; background: radial-gradient(circle at 50% 30%, rgba(224, 242, 254, 0.5) 0%, rgba(248, 250, 252, 1) 70%);">
+  <div class="container">
+    <div style="max-width: 520px; margin: 0 auto; background: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--slate-200); box-shadow: var(--shadow-xl); overflow: hidden;">
+      
+      <!-- Card Header -->
+      <div style="background: var(--navy-900); color: var(--white); padding: 2.25rem 2rem; text-align: center;">
+        <div style="width: 48px; height: 48px; background: var(--primary-gradient); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--white);">
+          <svg width="26" height="26" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z"/>
+          </svg>
+        </div>
+        <h1 style="color: var(--white); font-size: 1.6rem; margin-bottom: 0.35rem;">Welcome to Medico</h1>
+        <p style="color: var(--slate-300); font-size: 0.9rem;">Sign in to access your appointments and health records</p>
+      </div>
+
+      <div style="padding: 2rem;">
+        <!-- Quick Demo Login Bar -->
+        <div style="background: var(--primary-light); border: 1px solid rgba(10, 102, 194, 0.2); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.75rem;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">
+            ⚡ One-Click Interview & Demo Login:
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <a href="{% url 'login' %}?demo=patient_john" class="btn btn-sm btn-secondary" style="font-size: 0.8rem; justify-content: flex-start;">
+              <span>👤 Patient (John)</span>
+            </a>
+            <a href="{% url 'login' %}?demo=doctor" class="btn btn-sm btn-secondary" style="font-size: 0.8rem; justify-content: flex-start;">
+              <span>👨‍⚕️ Doctor (Dr. Sarah)</span>
+            </a>
+            <a href="{% url 'login' %}?demo=patient_emma" class="btn btn-sm btn-secondary" style="font-size: 0.8rem; justify-content: flex-start;">
+              <span>👩 Patient (Emma)</span>
+            </a>
+            <a href="{% url 'login' %}?demo=admin" class="btn btn-sm btn-secondary" style="font-size: 0.8rem; justify-content: flex-start;">
+              <span>🛡️ Administrator</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Standard Credentials Form -->
+        <form action="{% url 'login' %}" method="POST" id="loginForm">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-input" placeholder="e.g. john_patient or dr_sarah" required autofocus>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-input" placeholder="Enter password" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;" id="loginSubmitBtn">
+            <span>Sign In</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </form>
+
+        <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--slate-200); text-align: center; font-size: 0.9rem;">
+          <p style="color: var(--slate-600); margin-bottom: 0.5rem;">
+            New patient? <a href="{% url 'register_patient' %}" style="font-weight: 700; color: var(--primary);">Create Patient Account</a>
+          </p>
+          <p style="color: var(--slate-500); font-size: 0.85rem;">
+            Medical practitioner? <a href="{% url 'register_doctor' %}" style="color: var(--emerald-dark); font-weight: 600;">Register as Doctor</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

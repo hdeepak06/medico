@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Doctor Clinical Portal | Medico{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Doctor Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-user">
+      <img src="{{ doctor.get_photo }}" alt="{{ doctor.display_name }}" class="sidebar-avatar">
+      <div class="sidebar-user-info">
+        <h4>{{ doctor.display_name }}</h4>
+        <span class="role-tag doctor">{{ doctor.specialization.name|default:"Physician" }}</span>
+      </div>
+    </div>
+
+    <!-- Availability Status Card -->
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--slate-200); background: var(--slate-50);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--slate-500);">Practice Status:</span>
+        {% if doctor.is_available %}
+          <span class="status-badge completed" style="font-size: 0.72rem;">● Available</span>
+        {% else %}
+          <span class="status-badge cancelled" style="font-size: 0.72rem;">● Away / Off</span>
+        {% endif %}
+      </div>
+      <a href="{% url 'doctor_toggle_availability' %}" class="btn btn-secondary btn-sm" style="width: 100%; font-size: 0.8rem; justify-content: center;">
+        {% if doctor.is_available %}Switch to Away Mode{% else %}Switch to Available{% endif %}
+      </a>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li>
+        <a href="?tab=appointments&status=today" class="sidebar-link {% if status_filter == 'today' %}active{% endif %}">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+          <span>Today's Schedule ({{ stats.today_count }})</span>
+        </a>
+      </li>
+      <li>
+        <a href="?tab=appointments&status=pending" class="sidebar-link {% if status_filter == 'pending' %}active{% endif %}">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Pending Approvals ({{ stats.pending_count }})</span>
+        </a>
+      </li>
+      <li>
+        <a href="?tab=appointments&status=all" class="sidebar-link {% if status_filter == 'all' and active_tab == 'appointments' %}active{% endif %}">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>All Appointments ({{ stats.total_appointments }})</span>
+        </a>
+      </li>
+      <li>
+        <a href="?tab=schedule" class="sidebar-link {% if active_tab == 'schedule' %}active{% endif %}">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Clinical Hours & Schedule</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'profile' %}" class="sidebar-link">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Practice Profile & Fees</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Doctor Dashboard Main -->
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <h1>Doctor Practice Portal &bull; {{ doctor.display_name }}</h1>
+          {% if doctor.is_verified %}
+            <span class="status-badge completed">✓ Verified Practitioner</span>
+          {% else %}
+            <span class="status-badge pending">⏳ Verification Pending</span>
+          {% endif %}
+        </div>
+        <p>{{ doctor.hospital_name }} &bull; {{ doctor.city }} &bull; Standard Fee: ${{ doctor.consultation_fee }}</p>
+      </div>
+
+      <div>
+        <a href="{% url 'doctor_detail' doctor.id %}" target="_blank" class="btn btn-secondary btn-sm">
+          <span>View Public Profile ↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Doctor Metrics Grid -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon blue">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span>Today's Patients</span>
+          <strong>{{ stats.today_count }}</strong>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon amber">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span>Pending Requests</span>
+          <strong>{{ stats.pending_count }}</strong>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon green">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span>Completed Visits</span>
+          <strong>{{ stats.completed_count }}</strong>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon purple">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span>Patient Rating</span>
+          <strong>★ {{ stats.rating }}</strong>
+        </div>
+      </div>
+    </div>
+
+    {% if active_tab == 'schedule' %}
+      <!-- Clinical Schedule View -->
+      <div class="dashboard-panel">
+        <div class="panel-header">
+          <h2>Standard Weekly Clinical Hours</h2>
+          <span style="color: var(--slate-500); font-size: 0.9rem;">Slots are generated in 30-minute intervals</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+          {% for s in schedules %}
+            <div style="background: var(--slate-50); border: 1px solid var(--slate-200); padding: 1.25rem; border-radius: var(--radius-lg);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <strong style="font-size: 1.1rem; color: var(--navy-900);">{{ s.get_day_of_week_display }}</strong>
+                {% if s.is_active %}
+                  <span class="status-badge completed" style="font-size: 0.72rem;">Active</span>
+                {% else %}
+                  <span class="status-badge cancelled" style="font-size: 0.72rem;">Closed</span>
+                {% endif %}
+              </div>
+              <div style="color: var(--primary); font-size: 1rem; font-weight: 700;">
+                {{ s.start_time|time:"g:i A" }} &mdash; {{ s.end_time|time:"g:i A" }}
+              </div>
+              <div style="font-size: 0.8rem; color: var(--slate-500); margin-top: 0.25rem;">
+                {{ s.slot_duration }} minute patient consultation blocks
+              </div>
+            </div>
+          {% empty %}
+            <p style="color: var(--slate-500);">No custom schedule configured. System applies default weekday 9am-5pm hours.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    {% else %}
+      <!-- Appointments Queue Table -->
+      <div class="dashboard-panel">
+        <div class="panel-header">
+          <h2>Patient Appointments Queue</h2>
+
+          <!-- Filter Pills -->
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="?tab=appointments&status=all" class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">All ({{ stats.total_appointments }})</a>
+            <a href="?tab=appointments&status=today" class="btn btn-sm {% if status_filter == 'today' %}btn-primary{% else %}btn-secondary{% endif %}">Today ({{ stats.today_count }})</a>
+            <a href="?tab=appointments&status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-primary{% else %}btn-secondary{% endif %}">Pending ({{ stats.pending_count }})</a>
+            <a href="?tab=appointments&status=confirmed" class="btn btn-sm {% if status_filter == 'confirmed' %}btn-primary{% else %}btn-secondary{% endif %}">Confirmed</a>
+            <a href="?tab=appointments&status=completed" class="btn btn-sm {% if status_filter == 'completed' %}btn-primary{% else %}btn-secondary{% endif %}">Completed ({{ stats.completed_count }})</a>
+          </div>
+        </div>
+
+        {% if displayed_appts %}
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Patient Details</th>
+                  <th>Date & Time</th>
+                  <th>Consultation Type</th>
+                  <th>Reason / Symptoms</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for appt in displayed_appts %}
+                  <tr>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <img src="{{ appt.patient.user.get_avatar }}" alt="{{ appt.patient.user.full_name }}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover;">
+                        <div>
+                          <strong style="color: var(--navy-900);">{{ appt.patient.user.full_name }}</strong>
+                          <div style="font-size: 0.78rem; color: var(--slate-500);">
+                            {{ appt.patient.gender }} &bull; Blood: {{ appt.patient.blood_group|default:"N/A" }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <strong>{{ appt.formatted_date }}</strong>
+                      <div style="font-size: 0.82rem; color: var(--slate-500);">{{ appt.formatted_time }}</div>
+                    </td>
+                    <td>
+                      {% if appt.consultation_type == 'IN_PERSON' %}
+                        <span class="status-badge confirmed">🏥 In-Person</span>
+                      {% else %}
+                        <span class="status-badge" style="background: #EDE9FE; color: #7C3AED;">💻 Video Call</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <strong style="color: var(--navy-900); display: block;">{{ appt.reason_for_visit|truncatewords:5 }}</strong>
+                      {% if appt.symptoms %}
+                        <span style="font-size: 0.8rem; color: var(--slate-500);">{{ appt.symptoms|truncatewords:6 }}</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if appt.status == 'CONFIRMED' %}
+                        <span class="status-badge confirmed">Confirmed</span>
+                      {% elif appt.status == 'COMPLETED' %}
+                        <span class="status-badge completed">Completed</span>
+                      {% elif appt.status == 'PENDING' %}
+                        <span class="status-badge pending">Pending</span>
+                      {% elif appt.status == 'CANCELLED' %}
+                        <span class="status-badge cancelled">Cancelled</span>
+                      {% else %}
+                        <span class="status-badge rejected">{{ appt.get_status_display }}</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="action-group">
+                        <!-- Pending Actions -->
+                        {% if appt.status == 'PENDING' %}
+                          <a href="{% url 'doctor_appointment_action' appt.id 'confirm' %}" class="btn btn-emerald btn-sm" title="Approve Appointment">✓ Approve</a>
+                          <a href="{% url 'doctor_appointment_action' appt.id 'reject' %}" class="btn btn-secondary btn-sm" style="color: var(--rose);" title="Reject">✕ Reject</a>
+                        {% endif %}
+
+                        <!-- Confirmed Actions -->
+                        {% if appt.status == 'CONFIRMED' %}
+                          <a href="{% url 'doctor_complete_appointment' appt.id %}" class="btn btn-primary btn-sm" title="Complete Consultation & Write Rx">
+                            <span>Rx / Complete</span>
+                          </a>
+                        {% endif %}
+
+                        <!-- Completed Actions -->
+                        {% if appt.status == 'COMPLETED' %}
+                          <a href="{% url 'prescription_view' appt.id %}" class="btn btn-secondary btn-sm" title="View Prescription">
+                            <span>View Rx</span>
+                          </a>
+                        {% endif %}
+
+                        <a href="{% url 'appointment_detail' appt.id %}" class="btn btn-secondary btn-sm" title="View Full Record">Details</a>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 3rem 1rem; color: var(--slate-500);">
+            <p>No appointments found in this status category.</p>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Medical Specialties & Clinical Departments | Medico{% endblock %}
+
+{% block content %}
+<section style="background: var(--slate-100); padding: 3rem 0; border-bottom: 1px solid var(--slate-200);">
+  <div class="container" style="text-align: center; max-width: 750px;">
+    <div class="section-tag">Clinical Departments</div>
+    <h1>Comprehensive Medical Specialties</h1>
+    <p class="lead-text">Medico brings together world-class specialists across multiple disciplines, ensuring you receive focused and personalized diagnosis for every aspect of your wellbeing.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="specialties-grid">
+      {% for spec in specialties %}
+        <div class="specialty-card" style="text-align: left; align-items: flex-start; padding: 2.25rem;">
+          <div class="specialty-icon-box" style="background-color: {{ spec.color_accent }}15; color: {{ spec.color_accent }};">
+            <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+            </svg>
+          </div>
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem;">{{ spec.name }}</h3>
+          <p style="color: var(--slate-600); font-size: 0.92rem; line-height: 1.7; margin-bottom: 1.5rem;">{{ spec.description }}</p>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px solid var(--slate-100); padding-top: 1rem;">
+            <span style="font-weight: 700; color: var(--navy-900); font-size: 0.9rem;">{{ spec.doc_count }} Certified Physicians</span>
+            <a href="{% url 'specialty_detail' spec.slug %}" class="btn btn-outline-primary btn-sm">Explore &rarr;</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

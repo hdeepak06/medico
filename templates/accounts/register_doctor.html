@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Doctor Registration & Onboarding | Medico{% endblock %}
+
+{% block content %}
+<section style="padding: 3.5rem 0; background: radial-gradient(circle at 50% 20%, rgba(209, 250, 229, 0.4) 0%, rgba(248, 250, 252, 1) 70%);">
+  <div class="container">
+    <div style="max-width: 720px; margin: 0 auto; background: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--slate-200); box-shadow: var(--shadow-xl); overflow: hidden;">
+      
+      <div style="background: var(--navy-900); color: var(--white); padding: 2.25rem 2rem; text-align: center;">
+        <span class="section-tag" style="background: rgba(16, 185, 129, 0.2); color: #34D399; margin-bottom: 0.5rem;">Physician Network</span>
+        <h1 style="color: var(--white); font-size: 1.6rem; margin-bottom: 0.25rem;">Join Medico as a Healthcare Specialist</h1>
+        <p style="color: var(--slate-300); font-size: 0.9rem;">Grow your patient practice with smart scheduling, digital prescriptions, and clinical record management.</p>
+      </div>
+
+      <div style="padding: 2.25rem;">
+        <form action="{% url 'register_doctor' %}" method="POST" id="doctorRegisterForm">
+          {% csrf_token %}
+
+          {% if form.errors %}
+            <div class="alert alert-error">
+              <div>Please correct the errors in the registration form.</div>
+            </div>
+          {% endif %}
+
+          <h3 style="font-size: 1.1rem; color: var(--navy-900); border-bottom: 1px solid var(--slate-200); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">Account Credentials</h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">First Name *</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<div class="form-error">{{ form.first_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name *</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<div class="form-error">{{ form.last_name.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Username *</label>
+              {{ form.username }}
+              {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Password *</label>
+              {{ form.password }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password *</label>
+              {{ form.confirm_password }}
+              {% if form.confirm_password.errors %}<div class="form-error">{{ form.confirm_password.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.1rem; color: var(--navy-900); border-bottom: 1px solid var(--slate-200); padding-bottom: 0.5rem; margin: 1.5rem 0 1.25rem;">Professional Clinical Qualifications</h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Medical Specialization *</label>
+              {{ form.specialization }}
+              {% if form.specialization.errors %}<div class="form-error">{{ form.specialization.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Primary Qualifications *</label>
+              {{ form.qualification }}
+              {% if form.qualification.errors %}<div class="form-error">{{ form.qualification.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">License Number *</label>
+              {{ form.license_number }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Years of Experience *</label>
+              {{ form.experience_years }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Consultation Fee ($) *</label>
+              {{ form.consultation_fee }}
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Hospital / Clinic Affiliation *</label>
+              {{ form.hospital_name }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Contact *</label>
+              {{ form.phone }}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-emerald btn-lg" style="width: 100%; margin-top: 1rem;" id="doctorSignupSubmitBtn">
+            <span>Register Doctor Profile</span>
+          </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--slate-600);">
+          Already have a doctor account? <a href="{% url 'login' %}" style="font-weight: 700; color: var(--primary);">Sign In Here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

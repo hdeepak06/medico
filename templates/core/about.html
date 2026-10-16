@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Medico | Setting the Modern Standard for Patient Healthcare{% endblock %}
+
+{% block content %}
+<section style="background: radial-gradient(circle at 10% 20%, rgba(224, 242, 254, 0.7) 0%, rgba(248, 250, 252, 1) 70%); padding: 4.5rem 0; border-bottom: 1px solid var(--slate-200);">
+  <div class="container" style="max-width: 850px; text-align: center;">
+    <div class="section-tag">About Our Mission</div>
+    <h1>Transforming Healthcare Delivery, One Patient at a Time.</h1>
+    <p class="lead-text" style="margin-top: 1.25rem;">
+      Medico was founded to eliminate the friction, opacity, and delays in traditional outpatient healthcare. We connect patients with distinguished clinical specialists through modern scheduling, encrypted health records, and transparent patient care.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;" class="hero-grid">
+      <div>
+        <div class="section-tag section-tag-emerald">Clinical Integrity</div>
+        <h2 style="margin-bottom: 1.25rem;">Patient Wellbeing Supported by Advanced Medical Science</h2>
+        <p style="color: var(--slate-600); line-height: 1.8; margin-bottom: 1.25rem;">
+          Our platform integrates rigorous doctor verification with an intuitive, mobile-first scheduling interface. We partner with leading academic medical centers, regional clinics, and certified practitioners to ensure high clinical quality.
+        </p>
+        <p style="color: var(--slate-600); line-height: 1.8; margin-bottom: 2rem;">
+          Whether consulting in-person at a hospital clinic or through an encrypted video session, every consultation generates accessible clinical notes, medication regimens, and patient guidance.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <div style="background: var(--slate-50); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+            <strong style="display: block; font-size: 1.75rem; color: var(--primary); font-weight: 800;">100%</strong>
+            <span style="font-size: 0.85rem; color: var(--slate-500);">Verified Doctor Credentials</span>
+          </div>
+          <div style="background: var(--slate-50); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+            <strong style="display: block; font-size: 1.75rem; color: var(--emerald); font-weight: 800;">24/7</strong>
+            <span style="font-size: 0.85rem; color: var(--slate-500);">Emergency Coordination</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&auto=format&fit=crop&q=80" alt="Modern hospital facility with medical specialists" style="border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); border: 6px solid var(--white);">
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

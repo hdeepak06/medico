@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Appointment #{{ appointment.id }} - {{ appointment.doctor.display_name }} | Medico{% endblock %}
+
+{% block content %}
+<section style="background: var(--slate-100); padding: 3rem 0;">
+  <div class="container">
+    <div style="max-width: 860px; margin: 0 auto;">
+      <!-- Breadcrumb & Back -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <a href="{% url 'dashboard_dispatch' %}" class="btn btn-secondary btn-sm">&larr; Back to Dashboard</a>
+        <span style="font-size: 0.9rem; color: var(--slate-500);">Appointment Reference #{{ appointment.id }}</span>
+      </div>
+
+      <!-- Main Card -->
+      <div class="dashboard-panel" style="box-shadow: var(--shadow-lg);">
+        <!-- Header Banner with Status -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--slate-200); padding-bottom: 1.5rem; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.25rem;">
+              {{ appointment.get_consultation_type_display }}
+            </div>
+            <h1 style="font-size: 1.75rem;">Medical Appointment Overview</h1>
+            <div style="color: var(--slate-500); font-size: 0.95rem;">
+              Booked on {{ appointment.created_at|date:"F d, Y at g:i A" }}
+            </div>
+          </div>
+
+          <div>
+            {% if appointment.status == 'CONFIRMED' %}
+              <span class="status-badge confirmed" style="font-size: 0.95rem; padding: 0.5rem 1.25rem;">● Confirmed</span>
+            {% elif appointment.status == 'COMPLETED' %}
+              <span class="status-badge completed" style="font-size: 0.95rem; padding: 0.5rem 1.25rem;">✓ Completed</span>
+            {% elif appointment.status == 'PENDING' %}
+              <span class="status-badge pending" style="font-size: 0.95rem; padding: 0.5rem 1.25rem;">⏳ Pending Confirmation</span>
+            {% elif appointment.status == 'CANCELLED' %}
+              <span class="status-badge cancelled" style="font-size: 0.95rem; padding: 0.5rem 1.25rem;">✕ Cancelled</span>
+            {% else %}
+              <span class="status-badge rejected" style="font-size: 0.95rem; padding: 0.5rem 1.25rem;">✕ Rejected</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Appointment Time & Location Banner -->
+        <div style="background: var(--primary-light); border: 1px solid rgba(10, 102, 194, 0.2); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+          <div>
+            <span style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700;">Scheduled Date</span>
+            <strong style="font-size: 1.25rem; color: var(--navy-900);">{{ appointment.formatted_date }}</strong>
+          </div>
+          <div>
+            <span style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700;">Consultation Time</span>
+            <strong style="font-size: 1.25rem; color: var(--navy-900);">{{ appointment.formatted_time }}</strong>
+          </div>
+          <div>
+            <span style="display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700;">Consultation Fee</span>
+            <strong style="font-size: 1.25rem; color: var(--navy-900);">${{ appointment.doctor.consultation_fee }}</strong>
+          </div>
+        </div>
+
+        <!-- Doctor & Patient Details Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <!-- Doctor Info -->
+          <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem;">
+            <h3 style="font-size: 1rem; color: var(--slate-500); text-transform: uppercase; margin-bottom: 1rem;">Healthcare Specialist</h3>
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.75rem;">
+              <img src="{{ appointment.doctor.get_photo }}" alt="{{ appointment.doctor.display_name }}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover;">
+              <div>
+                <strong style="font-size: 1.1rem; color: var(--navy-900); display: block;">{{ appointment.doctor.display_name }}</strong>
+                <span style="color: var(--primary); font-weight: 600; font-size: 0.85rem;">{{ appointment.doctor.specialization.name }}</span>
+              </div>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--slate-600); line-height: 1.6;">
+              <div>🏥 {{ appointment.doctor.hospital_name }}</div>
+              <div>📍 {{ appointment.doctor.clinic_address }}</div>
+              <div>📞 {{ appointment.doctor.user.phone }}</div>
+            </div>
+          </div>
+
+          <!-- Patient Info -->
+          <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem;">
+            <h3 style="font-size: 1rem; color: var(--slate-500); text-transform: uppercase; margin-bottom: 1rem;">Patient Record</h3>
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.75rem;">
+              <img src="{{ appointment.patient.user.get_avatar }}" alt="{{ appointment.patient.user.full_name }}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover;">
+              <div>
+                <strong style="font-size: 1.1rem; color: var(--navy-900); display: block;">{{ appointment.patient.user.full_name }}</strong>
+                <span style="color: var(--slate-500); font-size: 0.85rem;">Patient ID #PT-{{ appointment.patient.id }}0{{ appointment.patient.user.id }}</span>
+              </div>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--slate-600); line-height: 1.6;">
+              <div>🩸 Blood Group: <strong>{{ appointment.patient.blood_group|default:"Not specified" }}</strong> &bull; Gender: {{ appointment.patient.gender }}</div>
+              <div>📞 Phone: {{ appointment.patient.user.phone }}</div>
+              <div>🚨 Emergency Contact: {{ appointment.patient.emergency_contact_name|default:"Not specified" }} ({{ appointment.patient.emergency_contact_phone }})</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visit Reason & Symptoms -->
+        <div style="margin-bottom: 2rem;">
+          <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Reason for Consultation</h3>
+          <p style="background: var(--slate-50); border: 1px solid var(--slate-200); padding: 1rem; border-radius: var(--radius-md); color: var(--navy-900); font-weight: 500;">
+            {{ appointment.reason_for_visit }}
+          </p>
+
+          {% if appointment.symptoms %}
+            <h3 style="font-size: 1.1rem; margin: 1.25rem 0 0.5rem;">Patient Symptoms & Background Notes</h3>
+            <p style="background: var(--slate-50); border: 1px solid var(--slate-200); padding: 1rem; border-radius: var(--radius-md); color: var(--slate-600);">
+              {{ appointment.symptoms }}
+            </p>
+          {% endif %}
+
+          {% if appointment.doctor_notes %}
+            <h3 style="font-size: 1.1rem; margin: 1.25rem 0 0.5rem; color: var(--primary);">Doctor Consultation Notes</h3>
+            <p style="background: var(--primary-light); border: 1px solid rgba(10, 102, 194, 0.2); padding: 1rem; border-radius: var(--radius-md); color: var(--navy-900);">
+              {{ appointment.doctor_notes }}
+            </p>
+          {% endif %}
+
+          {% if appointment.cancellation_reason %}
+            <div style="background: var(--rose-light); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: var(--radius-md); margin-top: 1.25rem; color: #991b1b;">
+              <strong>Cancellation Reason:</strong> {{ appointment.cancellation_reason }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Action Controls -->
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; border-top: 1px solid var(--slate-200); padding-top: 1.5rem;">
+          <!-- If Completed: view prescription -->
+          {% if appointment.status == 'COMPLETED' %}
+            <a href="{% url 'prescription_view' appointment.id %}" class="btn btn-emerald" id="viewPrescriptionSlipBtn">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <span>View & Print Official Prescription Slip</span>
+            </a>
+          {% endif %}
+
+          <!-- Doctor controls to mark completed if confirmed -->
+          {% if is_doctor and appointment.status == 'CONFIRMED' %}
+            <a href="{% url 'doctor_complete_appointment' appointment.id %}" class="btn btn-primary" id="doctorCompleteConsultBtn">
+              <span>Mark Completed & Issue Prescription</span>
+            </a>
+          {% endif %}
+
+          <!-- Reschedule & Cancel buttons if upcoming -->
+          {% if appointment.can_cancel %}
+            {% if is_patient or is_admin %}
+              <a href="{% url 'reschedule_appointment' appointment.id %}" class="btn btn-secondary">
+                <span>Reschedule Date / Slot</span>
+              </a>
+            {% endif %}
+            <a href="{% url 'cancel_appointment' appointment.id %}" class="btn btn-secondary" style="color: var(--rose); border-color: rgba(239, 68, 68, 0.4);">
+              <span>Cancel Appointment</span>
+            </a>
+          {% endif %}
+        </div>
+
+        <!-- Patient Review Section (if completed) -->
+        {% if appointment.status == 'COMPLETED' and is_patient %}
+          <div style="margin-top: 2.5rem; background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 1.75rem;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Rate & Review Your Visit with {{ appointment.doctor.display_name }}</h3>
+            {% if existing_review %}
+              <div style="color: #F59E0B; font-size: 1.2rem; margin-bottom: 0.5rem;">
+                {% for i in "12345" %}
+                  {% if forloop.counter <= existing_review.rating %}★{% else %}☆{% endif %}
+                {% endfor %}
+              </div>
+              <p style="color: var(--navy-900); font-style: italic;">"{{ existing_review.comment }}"</p>
+              <span style="font-size: 0.8rem; color: var(--slate-500);">Submitted on {{ existing_review.created_at|date:"M d, Y" }}</span>
+            {% else %}
+              <form action="{% url 'submit_review' appointment.id %}" method="POST" style="margin-top: 1rem;">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label class="form-label">Consultation Rating</label>
+                  <select name="rating" class="form-input" style="max-width: 200px;">
+                    <option value="5" selected>★★★★★ 5 - Exceptional Care</option>
+                    <option value="4">★★★★☆ 4 - Very Good</option>
+                    <option value="3">★★★☆☆ 3 - Average</option>
+                    <option value="2">★★☆☆☆ 2 - Needs Improvement</option>
+                    <option value="1">★☆☆☆☆ 1 - Unsatisfactory</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Review Comment</label>
+                  <textarea name="comment" class="form-input" rows="3" placeholder="Share your experience regarding the doctor's communication, diagnosis, and wait time..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Submit Review</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
